@@ -44,18 +44,6 @@ pipeline {
                     sh 'npm run test:coverage'
                 }
             }
-            post {
-                always {
-                    // publishHTML([
-                    //     allowMissing: false,
-                    //     alwaysLinkToLastBuild: true,
-                    //     keepAll: true,
-                    //     reportDir: 'coverage/lcov-report',
-                    //     reportFiles: 'index.html',
-                    //     reportName: 'Test Coverage Report'
-                    // ])
-                }
-            }
         }
         
         stage('Integration Tests') {
