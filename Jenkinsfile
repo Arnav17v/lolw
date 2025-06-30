@@ -46,14 +46,14 @@ pipeline {
             }
             post {
                 always {
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'coverage/lcov-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Test Coverage Report'
-                    ])
+                    // publishHTML([
+                    //     allowMissing: false,
+                    //     alwaysLinkToLastBuild: true,
+                    //     keepAll: true,
+                    //     reportDir: 'coverage/lcov-report',
+                    //     reportFiles: 'index.html',
+                    //     reportName: 'Test Coverage Report'
+                    // ])
                 }
             }
         }
