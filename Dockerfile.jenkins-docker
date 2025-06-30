@@ -1,0 +1,8 @@
+FROM jenkins/jenkins:lts
+
+USER root
+RUN apt-get update && apt-get install -y docker.io
+ARG DOCKER_GID=994
+RUN if getent group docker; then groupmod -g ${DOCKER_GID} docker; else groupadd -g ${DOCKER_GID} docker; fi \
+    && usermod -aG docker jenkins
+USER jenkins 

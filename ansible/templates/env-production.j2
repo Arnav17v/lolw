@@ -1,0 +1,46 @@
+# Application Configuration
+NODE_ENV=production
+NEXT_TELEMETRY_DISABLED=1
+
+# Database Configuration
+DATABASE_URL=postgresql://{{ postgres_user | default('ecommerce') }}:{{ postgres_password | default('password') }}@localhost:5432/ecommerce
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=ecommerce
+POSTGRES_USER={{ postgres_user | default('ecommerce') }}
+POSTGRES_PASSWORD={{ postgres_password | default('password') }}
+
+# Redis Configuration
+REDIS_URL=redis://localhost:6379
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Application Settings
+APP_PORT={{ app_port | default(3000) }}
+APP_HOST=0.0.0.0
+APP_URL=https://{{ domain_name | default('app.production.com') }}
+
+# Security
+JWT_SECRET={{ jwt_secret | default('your-super-secret-jwt-key-change-in-production') }}
+SESSION_SECRET={{ session_secret | default('your-super-secret-session-key-change-in-production') }}
+
+# Monitoring
+GRAPHITE_HOST=localhost
+GRAPHITE_PORT=2003
+STATSD_HOST=localhost
+STATSD_PORT=8125
+
+# External Services
+PAYMENT_API_KEY={{ payment_api_key | default('') }}
+SHIPPING_API_KEY={{ shipping_api_key | default('') }}
+EMAIL_API_KEY={{ email_api_key | default('') }}
+
+# Logging
+LOG_LEVEL=info
+LOG_FORMAT=json
+LOG_FILE=/opt/{{ app_name }}/logs/app.log
+
+# Performance
+MAX_CONNECTIONS=100
+CONNECTION_TIMEOUT=30000
+REQUEST_TIMEOUT=30000 

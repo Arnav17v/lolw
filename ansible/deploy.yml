@@ -1,0 +1,136 @@
+---
+- name: Deploy E-commerce Application
+  hosts: "{{ target_hosts | default('all') }}"
+  become: yes
+  vars:
+    app_name: "ecommerce-nextjs-app"
+    app_port: 3000
+    docker_registry: "{{ docker_registry | default('your-registry.com') }}"
+    docker_image: "{{ docker_image | default('ecommerce-nextjs-app:latest') }}"
+    environment: "{{ environment | default('production') }}"
+    
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+      
+    - name: Install required packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - python3-pip
+          - curl
+        state: present
+      when: ansible_os_family == "Debian"
+      
+    - name: Install Docker Python module
+      pip:
+        name: docker
+        state: present
+        
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+        
+    - name: Create application directory
+      file:
+        path: "/opt/{{ app_name }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        
+    - name: Create logs directory
+      file:
+        path: "/opt/{{ app_name }}/logs"
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        
+    - name: Copy Docker Compose file
+      template:
+        src: "docker-compose-{{ environment }}.yml.j2"
+        dest: "/opt/{{ app_name }}/docker-compose.yml"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+        
+    - name: Copy environment configuration
+      template:
+        src: "env-{{ environment }}.j2"
+        dest: "/opt/{{ app_name }}/.env"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0600'
+        
+    - name: Create Nginx configuration
+      template:
+        src: "nginx-{{ environment }}.conf.j2"
+        dest: "/etc/nginx/sites-available/{{ app_name }}"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: reload nginx
+      
+    - name: Enable Nginx site
+      file:
+        src: "/etc/nginx/sites-available/{{ app_name }}"
+        dest: "/etc/nginx/sites-enabled/{{ app_name }}"
+        state: link
+      notify: reload nginx
+      
+    - name: Pull latest Docker image
+      docker_image:
+        name: "{{ docker_image }}"
+        source: pull
+        force_source: yes
+        
+    - name: Stop existing containers
+      docker_compose:
+        project_src: "/opt/{{ app_name }}"
+        state: absent
+      ignore_errors: yes
+      
+    - name: Start application containers
+      docker_compose:
+        project_src: "/opt/{{ app_name }}"
+        state: present
+        build: no
+        
+    - name: Wait for application to start
+      uri:
+        url: "http://localhost:{{ app_port }}/api/health"
+        status_code: 200
+      register: health_check
+      retries: 10
+      delay: 5
+      until: health_check.status == 200
+      
+    - name: Create monitoring configuration
+      template:
+        src: "monitoring.yml.j2"
+        dest: "/opt/{{ app_name }}/monitoring.yml"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+        
+    - name: Start monitoring stack
+      docker_compose:
+        project_src: "/opt/{{ app_name }}"
+        files:
+          - docker-compose.yml
+          - monitoring.yml
+        state: present
+      when: environment == "production"
+      
+  handlers:
+    - name: reload nginx
+      systemd:
+        name: nginx
+        state: reloaded 
