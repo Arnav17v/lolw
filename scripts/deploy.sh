@@ -183,4 +183,36 @@ case "${1:-}" in
     *)
         main
         ;;
-esac 
+esac
+
+# Stop and remove all Docker containers
+echo "[1/6] Stopping all running Docker containers..."
+docker ps -aq | xargs -r docker stop || true
+docker ps -aq | xargs -r docker rm || true
+
+echo "[2/6] Checking and freeing up ports 3000 and 8080 if needed..."
+for port in 3000 8080; do
+  pid=$(sudo lsof -t -i :$port || true)
+  if [ -n "$pid" ]; then
+    echo "Port $port is in use by PID $pid. Killing..."
+    sudo kill -9 $pid || true
+  else
+    echo "Port $port is free."
+  fi
+done
+
+echo "[3/6] Restarting Docker service..."
+sudo systemctl restart docker
+sleep 2
+
+echo "[4/6] Building and starting Docker Compose stack..."
+docker-compose up --build -d
+
+# Optional: Show status
+echo "[5/6] Docker Compose service status:"
+docker-compose ps
+
+echo "[6/6] All services should now be running."
+echo "- App:      http://localhost:3000"
+echo "- Grafana:  http://localhost:3001 (if configured)"
+echo "- Graphite: http://localhost:8080 (if configured)" 

@@ -148,3 +148,4 @@ Start with `npm run dev` and visit http://localhost:3000 to see your e-commerce 
 ---
 
 **This project demonstrates modern web development with automated deployment - perfect for learning DevOps practices!**
+ 

@@ -1,7 +1,10 @@
 FROM jenkins/jenkins:lts
 
 USER root
-RUN apt-get update && apt-get install -y docker.io
+RUN apt-get update && apt-get install -y docker.io curl
+# Install Node.js (LTS) and npm
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
 ARG DOCKER_GID=994
 RUN if getent group docker; then groupmod -g ${DOCKER_GID} docker; else groupadd -g ${DOCKER_GID} docker; fi \
     && usermod -aG docker jenkins
