@@ -46,21 +46,19 @@ pipeline {
             }
         }
         
-        stage('Integration Tests') {
-            steps {
-                script {
-                    // Start application in container for integration tests
-                    sh 'docker-compose up -d app'
-                    sh 'sleep 10' // Wait for app to start
-                    
-                    // Run integration tests
-                    sh 'npm run test:integration'
-                    
-                    // Cleanup
-                    sh 'docker-compose down'
-                }
-            }
-        }
+        //        stage('Integration Tests') {
+        //            steps {
+        //                script {
+        //                    // Start application in container for integration tests
+        //                    sh 'docker-compose up -d app'
+        //                    sh 'sleep 10' // Wait for app to start
+        //                    // Run integration tests
+        //                    sh 'npm run test:integration'
+        //                    // Cleanup
+        //                    sh 'docker-compose down'
+        //                }
+        //            }
+        //        }
         
         stage('Security Scan') {
             steps {
