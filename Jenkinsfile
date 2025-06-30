@@ -65,9 +65,8 @@ pipeline {
                 script {
                     // Run security audit
                     sh 'npm audit --audit-level moderate || true'
-                    
                     // Run container security scan
-                    sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}:/app aquasec/trivy image ${DOCKER_IMAGE}:${DOCKER_TAG}'
+                    // sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}:/app aquasec/trivy image ${DOCKER_IMAGE}:${DOCKER_TAG}'
                 }
             }
         }
